@@ -1,99 +1,76 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import Image from "next/image";
-import reactLogo from "../assets/react.svg";
-import tauriLogo from "../assets/tauri.svg";
-import nextLogo from "../assets/next.svg";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
+const App = () => {
   const [todoList, setList] = useState([]);
-  const [name, setName] = useState("");
-
-  async function greet() {
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const [description, setDescription] = useState('');
 
   async function fetchData() {
     setList(await invoke("show_list"))
-    console.log('fetched', todoList);
+  }
+
+  const initTodo = async () => {
+    if (description === '') return false;
+    const result: string = await invoke("add_todo", { description });
+    const renderedList: Partial<any>[] = Array.from(JSON.parse(result))
+    setList(renderedList);
   }
 
   async function addData() {
-    setList(await invoke("add_todo"))
-    console.log('fetched', todoList);
+    initTodo();
+    await setDescription("")
+  }
+
+  const resolveItem = async (index: number, status: boolean) => {
+    const result: string = await invoke("change_state", { index,  status});
+    const renderedList: Partial<any>[] = Array.from(JSON.parse(result))
+    setList(renderedList);
+  }
+
+  const removeItem = async (index: number) => {
+    const result: string = await invoke("remove_item", { index });
+    const renderedList: Partial<any>[] = Array.from(JSON.parse(result))
+    setList(renderedList);
   }
 
   useEffect(() => {
     const fetchData = async () => {
-      setList(await invoke("show_list"))
+      initTodo();
     }
     fetchData().catch(console.error);
-    console.log('fetched', todoList);
-  }, [])
+  }, []);
+
+  const listItems = Array.isArray(todoList) && todoList.map((todoElement, index) => {
+    const classToState = todoElement.status? 'resolved' : '';
+    const resolveLabel = todoElement.status? 'un-resolve' : 'resolve';
+    return (<li className={`todo-item ${classToState}`} key={index}>
+      <div className="todo-item__layout">
+        <div>{todoElement.description}</div>
+        <div>
+          <button type="button" onClick={() => resolveItem(index, !todoElement.status)}>{resolveLabel}</button>
+          <button type="button" onClick={() => removeItem(index)}>remove</button>
+        </div>
+      </div>
+    </li>)
+    }
+  );
 
   return (
     <div className="container">
-      <h1>Welcome to Tauri!</h1>
-      todoList: { todoList }
-      <div className="row">
-        <span className="logos">
-          <a href="https://nextjs.org" target="_blank">
-            <Image
-              width={144}
-              height={144}
-              src={nextLogo}
-              className="logo next"
-              alt="Next logo"
-            />
-          </a>
-        </span>
-        <span className="logos">
-          <a href="https://tauri.app" target="_blank">
-            <Image
-              width={144}
-              height={144}
-              src={tauriLogo}
-              className="logo tauri"
-              alt="Tauri logo"
-            />
-          </a>
-        </span>
-        <span className="logos">
-          <a href="https://reactjs.org" target="_blank">
-            <Image
-              width={144}
-              height={144}
-              src={reactLogo}
-              className="logo react"
-              alt="React logo"
-            />
-          </a>
-        </span>
-      </div>
-
-      <p>Click on the Tauri, Next, and React logos to learn more.</p>
-
       <div className="row">
         <div>
           <input
-            id="greet-input"
-            onChange={(e) => setName(e.currentTarget.value)}
-            placeholder="Enter a name..."
+            id="description"
+            value = {description}
+            onChange={(e) => setDescription(e.currentTarget.value)}
+            placeholder="Enter a todo description..."
           />
-          <button type="button" onClick={() => greet()}>
-            Greet
-          </button> 
-          <button type="button" onClick={() => fetchData()}>
-            Fetch
-          </button>
-          <button type="button" onClick={() => addData()}>
-            Add
-          </button>
+          <button type="button" onClick={() => addData()}>Add</button>
         </div>
       </div>
 
-      <p>{greetMsg}</p>
+      <ul>{listItems}</ul>
+
     </div>
   );
 }

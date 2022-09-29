@@ -16,27 +16,17 @@
 
 .container {
   margin: 0;
-  padding-top: 10vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
 .row {
   display: flex;
-  justify-content: center;
+  position: sticky;
+  top: 0;
+  background-color: #2f2f2f;
 }
 
 a {
@@ -80,8 +70,47 @@ button {
   outline: none;
 }
 
-#greet-input {
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+#description {
   margin-right: 5px;
+}
+
+.todo-item__layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+li {
+  padding: 0.85em;
+  text-align: left;
+  margin-bottom: 0.5rem;
+  background: #494847;
+  letter-spacing: 0.02rem;
+  transition: all 0.3s ease-out;
+  border-left: 5px solid #cf972e;
+}
+
+.li:hover {
+  background: #36322e72;
+}
+
+li:last-child {
+  margin-bottom: 0px;
+}
+
+.resolved {
+  border-left: 5px solid green;
+}
+
+.todo-item__layout div {
+  margin-right: 2rem;
 }
 
 @media (prefers-color-scheme: dark) {

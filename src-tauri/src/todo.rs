@@ -1,7 +1,6 @@
-use serde::{Serialize};
-#[derive(Serialize)]
+use serde::{Serialize, Deserialize};
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Todo {
-    title: String,
     description: String,
     status: bool,
 }
@@ -17,12 +16,20 @@ pub fn show_list() -> String {
     }
 }
 
-pub unsafe fn add_to_list() {
+pub unsafe fn add_to_list(description: &str) {
     TODO_LIST.push(
         Todo {
-            title: "My first task to achieve".to_string(),
-            description: "This is a description of he task.".to_string(),
+            description: description.to_string(),
             status: false
         }
     );
+}
+
+pub unsafe fn change_state(index: usize, status: bool) {
+    let mut item = &mut TODO_LIST[index];
+    item.status = status.to_owned();
+}
+
+pub unsafe fn remove_item(index: usize) {
+    TODO_LIST.remove(index);
 }

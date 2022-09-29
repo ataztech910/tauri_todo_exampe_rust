@@ -4,27 +4,32 @@
 )]
 mod todo;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[tauri::command]
 fn show_list() -> String {
     format!("{}", todo::show_list())
 }
 
 #[tauri::command]
-fn add_todo() -> String {
-    unsafe { todo::add_to_list(); }
+fn add_todo(description: &str) -> String {
+    unsafe { todo::add_to_list(description); }
+    show_list()
+}
+
+#[tauri::command]
+fn change_state(index: usize, status: bool) -> String {
+    unsafe { todo::change_state(index, status); }
+    show_list()
+}
+
+#[tauri::command]
+fn remove_item(index: usize) -> String {
+    unsafe { todo::remove_item(index); }
     show_list()
 }
 
 fn main() {
-    unsafe { todo::add_to_list(); }
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, show_list, add_todo])
+        .invoke_handler(tauri::generate_handler![show_list, add_todo, change_state, remove_item])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
